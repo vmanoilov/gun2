@@ -29,18 +29,20 @@ export default function ProvidersPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <form onSubmit={onSubmit} className="card p-5 space-y-4 lg:col-span-1">
           <div className="space-y-1">
-            <label className="label">Provider name</label>
+            <label htmlFor="provider-name" className="label">Provider name</label>
             <input
+              id="provider-name"
               className="input"
-              placeholder="OpenAI GPT-4.1"
+              placeholder="OpenAI GPT-4"
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
               required
             />
           </div>
           <div className="space-y-1">
-            <label className="label">API base URL</label>
+            <label htmlFor="provider-api-base-url" className="label">API base URL</label>
             <input
+              id="provider-api-base-url"
               className="input"
               placeholder="https://api.openai.com/v1"
               value={form.api_base_url}
@@ -48,8 +50,9 @@ export default function ProvidersPage() {
             />
           </div>
           <div className="space-y-1">
-            <label className="label">API key alias (env)</label>
+            <label htmlFor="provider-api-key-alias" className="label">API key alias (env)</label>
             <input
+              id="provider-api-key-alias"
               className="input"
               placeholder="OPENAI_KEY"
               value={form.api_key_alias}

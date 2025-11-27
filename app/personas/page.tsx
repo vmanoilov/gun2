@@ -29,8 +29,9 @@ export default function PersonasPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <form onSubmit={onSubmit} className="card p-5 space-y-4 lg:col-span-1">
           <div className="space-y-1">
-            <label className="label">Name</label>
+            <label htmlFor="persona-name" className="label">Name</label>
             <input
+              id="persona-name"
               className="input"
               placeholder="Red Team"
               value={form.name}
@@ -39,8 +40,9 @@ export default function PersonasPage() {
             />
           </div>
           <div className="space-y-1">
-            <label className="label">Description</label>
+            <label htmlFor="persona-description" className="label">Description</label>
             <textarea
+              id="persona-description"
               className="input h-24"
               placeholder="Find jailbreaks, unsafe content, or weak logic."
               value={form.description}
@@ -48,8 +50,9 @@ export default function PersonasPage() {
             />
           </div>
           <div className="space-y-1">
-            <label className="label">System prompt</label>
+            <label htmlFor="persona-system-prompt" className="label">System prompt</label>
             <textarea
+              id="persona-system-prompt"
               className="input h-28"
               placeholder="You adversarially critique outputs with concrete evidence."
               value={form.system_prompt}

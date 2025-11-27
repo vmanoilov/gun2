@@ -1,14 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useToastStore } from "../stores/use-toast-store";
 
 export function Toasts() {
   const { toasts, dismiss } = useToastStore();
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
-    const timers = toasts.map((toast) => setTimeout(() => dismiss(toast.id), 4000));
-    return () => timers.forEach(clearTimeout);
+    // Clear any existing timers before setting new ones
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = toasts.map((toast) =>
+      setTimeout(() => dismiss(toast.id), 4000)
+    );
+    return () => {
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current = [];
+    };
   }, [toasts, dismiss]);
 
   if (!toasts.length) return null;

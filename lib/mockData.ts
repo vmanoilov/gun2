@@ -4,7 +4,7 @@ export const sampleProviders: ModelProvider[] = [
   {
     id: "provider-openai",
     owner_id: "demo",
-    name: "OpenAI GPT-4.1",
+    name: "OpenAI GPT-4",
     api_base_url: "https://api.openai.com/v1",
     api_key_alias: "OPENAI_KEY",
     is_shared: true
