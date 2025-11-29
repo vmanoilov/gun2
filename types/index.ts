@@ -8,7 +8,7 @@ export type Profile = {
 
 export type ModelProvider = {
   id: string;
-  owner_id: string;
+  owner_id: string | null;
   name: string;
   api_base_url?: string;
   api_key_alias?: string;
@@ -18,7 +18,7 @@ export type ModelProvider = {
 
 export type Persona = {
   id: string;
-  owner_id: string;
+  owner_id: string | null;
   name: string;
   description?: string;
   system_prompt?: string;
@@ -27,7 +27,7 @@ export type Persona = {
 
 export type Arena = {
   id: string;
-  owner_id: string;
+  owner_id: string | null;
   title: string;
   description?: string;
   created_at?: string;
@@ -36,7 +36,7 @@ export type Arena = {
 export type ArenaRun = {
   id: string;
   arena_id: string;
-  owner_id: string;
+  owner_id: string | null;
   input_prompt: string;
   status: "pending" | "running" | "completed" | "failed";
   created_at?: string;
