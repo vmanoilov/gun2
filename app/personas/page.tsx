@@ -1,23 +1,70 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { NotebookPen, Quote } from "lucide-react";
-import { samplePersonas } from "../../lib/mockData";
+import { PersonaService } from "../../lib/database/personas";
+import { Persona } from "../../types";
 import { useToastStore } from "../../stores/use-toast-store";
 
 export default function PersonasPage() {
   const { push } = useToastStore();
+  const [personas, setPersonas] = useState<Persona[]>([]);
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ name: "", description: "", system_prompt: "" });
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    loadPersonas();
+  }, []);
+
+  const loadPersonas = async () => {
+    try {
+      const data = await PersonaService.getAll();
+      setPersonas(data);
+    } catch (error) {
+      console.error("Error loading personas:", error);
+      push({ title: "Error loading personas", variant: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!form.name.trim()) {
       push({ title: "Persona name required", variant: "error" });
       return;
     }
-    push({ title: "Persona saved", description: "Attach to arenas for critiques and role clarity.", variant: "success" });
-    setForm({ name: "", description: "", system_prompt: "" });
+
+    try {
+      await PersonaService.create({
+        owner_id: null, // Demo mode - no authentication required
+        name: form.name,
+        description: form.description || undefined,
+        system_prompt: form.system_prompt || undefined
+      });
+      
+      push({ title: "Persona saved", variant: "success" });
+      setForm({ name: "", description: "", system_prompt: "" });
+      await loadPersonas(); // Reload the list
+    } catch (error) {
+      console.error("Error creating persona:", error);
+      push({ title: "Failed to save persona", variant: "error" });
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <header className="space-y-2">
+          <p className="text-primary font-semibold">Personas</p>
+          <h1 className="text-3xl font-bold text-gray-900">Design debate-ready personas</h1>
+        </header>
+        <div className="card p-6">
+          <p>Loading personas...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -62,21 +109,27 @@ export default function PersonasPage() {
           </button>
         </form>
         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {samplePersonas.map((persona) => (
-            <div key={persona.id} className="card p-4 space-y-3">
-              <div className="flex items-center gap-2 text-primary">
-                <NotebookPen className="h-4 w-4" />
-                <p className="text-sm font-semibold">{persona.name}</p>
-              </div>
-              <p className="text-sm text-gray-700">{persona.description}</p>
-              <div className="rounded-lg bg-gray-50 p-3 text-xs text-gray-800">
-                <div className="flex items-center gap-2 text-gray-500 mb-1">
-                  <Quote className="h-4 w-4" /> System prompt
-                </div>
-                <p>{persona.system_prompt}</p>
-              </div>
+          {personas.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 col-span-2">
+              <p>No personas found. Create your first persona to get started.</p>
             </div>
-          ))}
+          ) : (
+            personas.map((persona) => (
+              <div key={persona.id} className="card p-4 space-y-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <NotebookPen className="h-4 w-4" />
+                  <p className="text-sm font-semibold">{persona.name}</p>
+                </div>
+                <p className="text-sm text-gray-700">{persona.description}</p>
+                <div className="rounded-lg bg-gray-50 p-3 text-xs text-gray-800">
+                  <div className="flex items-center gap-2 text-gray-500 mb-1">
+                    <Quote className="h-4 w-4" /> System prompt
+                  </div>
+                  <p>{persona.system_prompt}</p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

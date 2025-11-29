@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Clock, Filter, PlusCircle } from "lucide-react";
-import { sampleRun } from "../../lib/mockData";
+import { RunService } from "../../lib/database/runs";
 
 const statuses = [
   { label: "Pending", value: "pending" },
@@ -9,7 +9,19 @@ const statuses = [
   { label: "Failed", value: "failed" }
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  // In a real app, this would be done with proper auth
+  // For now, we'll show a placeholder when no data exists
+  let runs = [];
+  let error = null;
+
+  try {
+    runs = await RunService.getAll();
+  } catch (err) {
+    console.error("Error loading runs:", err);
+    error = "Failed to load runs. Please check your database connection.";
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -34,25 +46,47 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
-      <div className="card p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-500">#{sampleRun.id}</p>
-            <h3 className="text-xl font-semibold text-gray-900">{sampleRun.input_prompt}</h3>
-            <p className="text-sm text-gray-600">Status: {sampleRun.status}</p>
+      
+      {error ? (
+        <div className="card p-6">
+          <div className="text-center py-8">
+            <p className="text-red-600 mb-2">⚠️ {error}</p>
+            <p className="text-gray-600">This is expected if you haven't set up your Supabase database yet.</p>
+            <p className="text-gray-600">Check the supabase-schema.sql file to set up your database.</p>
           </div>
-          <div className="flex items-center gap-2 text-gray-700 text-sm">
-            <Clock className="h-4 w-4" /> {new Date(sampleRun.created_at || "").toLocaleString()}
-          </div>
-          <Link href={`/runs/${sampleRun.id}`} className="btn-secondary">
-            View run
-          </Link>
         </div>
-        <p className="text-sm text-gray-700 leading-relaxed">
-          Track structured rounds, view critiques, and export JSON for automation. Real-time updates are wired through Supabase
-          subscriptions once deployed.
-        </p>
-      </div>
+      ) : runs.length === 0 ? (
+        <div className="card p-6">
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-2">No arena runs found.</p>
+            <p className="text-gray-600">Create your first arena run to get started.</p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {runs.map((run) => (
+            <div key={run.id} className="card p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">#{run.id}</p>
+                  <h3 className="text-xl font-semibold text-gray-900">{run.input_prompt}</h3>
+                  <p className="text-sm text-gray-600">Status: {run.status}</p>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700 text-sm">
+                  <Clock className="h-4 w-4" /> {new Date(run.created_at || "").toLocaleString()}
+                </div>
+                <Link href={`/runs/${run.id}`} className="btn-secondary">
+                  View run
+                </Link>
+              </div>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Track structured rounds, view critiques, and export JSON for automation. Real-time updates are wired through Supabase
+                subscriptions once deployed.
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

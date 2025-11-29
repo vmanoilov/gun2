@@ -16,6 +16,22 @@ export const sampleProviders: ModelProvider[] = [
     api_base_url: "https://api.anthropic.com",
     api_key_alias: "ANTHROPIC_KEY",
     is_shared: false
+  },
+  {
+    id: "provider-bigmodel",
+    owner_id: "demo",
+    name: "ZhipuAI GLM-4",
+    api_base_url: "https://open.bigmodel.cn/api/paas/v4/",
+    api_key_alias: "BIGMODEL_KEY",
+    is_shared: true
+  },
+  {
+    id: "provider-mistral",
+    owner_id: "demo",
+    name: "Mistral AI",
+    api_base_url: "https://api.mistral.ai",
+    api_key_alias: "MISTRAL_KEY",
+    is_shared: true
   }
 ];
 

@@ -1,39 +1,94 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState, useEffect } from "react";
 import { GitBranch, UsersRound } from "lucide-react";
-import { samplePersonas, sampleProviders } from "../../../lib/mockData";
+import { ProviderService } from "../../../lib/database/providers";
+import { PersonaService } from "../../../lib/database/personas";
+import { ModelProvider, Persona } from "../../../types";
 import { useToastStore } from "../../../stores/use-toast-store";
 
 const roles = ["Red", "Blue", "Purple", "Judge"];
 
 export default function ArenaBuilderPage() {
   const { push } = useToastStore();
-  const defaultProviderId = sampleProviders[0]?.id ?? "";
-  const defaultPersonaId = samplePersonas[0]?.id ?? "";
+  const [providers, setProviders] = useState<ModelProvider[]>([]);
+  const [personas, setPersonas] = useState<Persona[]>([]);
+  const [loading, setLoading] = useState(true);
   const [prompt, setPrompt] = useState("");
   const [rounds, setRounds] = useState(2);
   const [temperature, setTemperature] = useState(0.3);
   const [participants, setParticipants] = useState(
-    roles.map((role) => ({ role, provider_id: defaultProviderId, persona_id: defaultPersonaId }))
+    roles.map((role) => ({ role, provider_id: "", persona_id: "" }))
   );
 
-  const handleSubmit = () => {
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [providersData, personasData] = await Promise.all([
+        ProviderService.getAll(),
+        PersonaService.getAll()
+      ]);
+      setProviders(providersData);
+      setPersonas(personasData);
+      
+      // Set default selections if data is available
+      if (providersData.length > 0 && personasData.length > 0) {
+        setParticipants(prev => 
+          prev.map(p => ({
+            ...p,
+            provider_id: providersData[0].id,
+            persona_id: personasData[0].id
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Error loading data:", error);
+      push({ title: "Error loading providers and personas", variant: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
     if (!prompt.trim()) {
       push({ title: "Prompt required", variant: "error" });
       return;
     }
-    push({
-      title: "Arena configured",
-      description: "Supabase functions can start background jobs and stream statuses.",
-      variant: "success"
-    });
+
+    try {
+      // TODO: Create actual arena run when we have the database set up
+      push({
+        title: "Arena configured",
+        description: "Database integration is ready. Set up Supabase to enable run creation.",
+        variant: "success"
+      });
+    } catch (error) {
+      console.error("Error creating run:", error);
+      push({ title: "Failed to create run", variant: "error" });
+    }
   };
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     handleSubmit();
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <header className="space-y-2">
+          <p className="text-primary font-semibold">Arena builder</p>
+          <h1 className="text-3xl font-bold text-gray-900">Configure debate settings</h1>
+        </header>
+        <div className="card p-6">
+          <p>Loading providers and personas...</p>
+        </div>
+      </div>
+    );
+  }
 
   const participantSelector = useMemo(
     () =>
@@ -54,7 +109,7 @@ export default function ArenaBuilderPage() {
                   })
                 }
               >
-                {sampleProviders.map((provider) => (
+                {providers.map((provider) => (
                   <option key={provider.id} value={provider.id}>
                     {provider.name}
                   </option>
@@ -74,7 +129,7 @@ export default function ArenaBuilderPage() {
                   })
                 }
               >
-                {samplePersonas.map((persona) => (
+                {personas.map((persona) => (
                   <option key={persona.id} value={persona.id}>
                     {persona.name}
                   </option>
@@ -84,7 +139,7 @@ export default function ArenaBuilderPage() {
           </div>
         </div>
       )),
-    [participants]
+    [participants, providers, personas]
   );
 
   return (
@@ -147,10 +202,22 @@ export default function ArenaBuilderPage() {
           <div className="flex items-center gap-2 text-primary">
             <UsersRound className="h-5 w-5" /> Participants
           </div>
-          {participantSelector}
-          <button type="submit" className="btn-primary w-full">
-            <GitBranch className="mr-2 h-4 w-4" /> Start run
-          </button>
+          {providers.length === 0 || personas.length === 0 ? (
+            <div className="text-center py-4 text-gray-500">
+              <p className="text-sm">
+                {providers.length === 0 && "No providers available. "}
+                {personas.length === 0 && "No personas available. "}
+                Create some first to build an arena.
+              </p>
+            </div>
+          ) : (
+            <>
+              {participantSelector}
+              <button type="submit" className="btn-primary w-full">
+                <GitBranch className="mr-2 h-4 w-4" /> Start run
+              </button>
+            </>
+          )}
           <p className="text-xs text-gray-600">
             Background orchestration can stream round updates via Supabase real-time. Add Stripe hooks later for quota-bound runs.
           </p>
