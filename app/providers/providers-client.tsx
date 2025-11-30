@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState, useEffect, useCallback } from "react";
 import { Shield, ToggleLeft } from "lucide-react";
 import { ProviderService } from "../../lib/database/providers";
 import { ModelProvider } from "../../types";
@@ -21,7 +21,7 @@ export default function ProvidersClient({ initialProviders, userId }: ProvidersC
     setProviders(initialProviders);
   }, [initialProviders]);
 
-  const loadProviders = async () => {
+  const loadProviders = useCallback(async () => {
     try {
       const data = await ProviderService.getAll();
       // Filter by user since service doesn't do it
@@ -31,7 +31,7 @@ export default function ProvidersClient({ initialProviders, userId }: ProvidersC
       console.error("Error loading providers:", error);
       push({ title: "Error loading providers", variant: "error" });
     }
-  };
+  }, [userId, push]);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

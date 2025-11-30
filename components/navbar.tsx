@@ -1,11 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ShieldCheck, Sparkles, User, LogOut } from "lucide-react";
 import { supabaseBrowserClient } from "../lib/supabase";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-
-"use client";
 
 const links = [
   { href: "/", label: "Home" },

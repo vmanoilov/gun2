@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState, useEffect } from "react";
+import { FormEvent, useMemo, useState, useEffect, useCallback } from "react";
 import { GitBranch, UsersRound } from "lucide-react";
 import { ProviderService } from "../../../lib/database/providers";
 import { PersonaService } from "../../../lib/database/personas";
@@ -23,11 +23,7 @@ export default function ArenaBuilderPage() {
     roles.map((role) => ({ role, provider_id: "", persona_id: "", participant_id: "" }))
   );
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [providersData, personasData, participantsData] = await Promise.all([
         ProviderService.getAll(),
@@ -54,7 +50,11 @@ export default function ArenaBuilderPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [push]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const participantSelector = useMemo(
     () =>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState, useEffect, useCallback } from "react";
 import { NotebookPen, Quote } from "lucide-react";
 import { PersonaService } from "../../lib/database/personas";
 import { Persona } from "../../types";
@@ -12,11 +12,7 @@ export default function PersonasPage() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ name: "", description: "", system_prompt: "" });
 
-  useEffect(() => {
-    loadPersonas();
-  }, []);
-
-  const loadPersonas = async () => {
+  const loadPersonas = useCallback(async () => {
     try {
       const data = await PersonaService.getAll();
       setPersonas(data);
@@ -26,7 +22,11 @@ export default function PersonasPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [push]);
+
+  useEffect(() => {
+    loadPersonas();
+  }, [loadPersonas]);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

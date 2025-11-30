@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState, useEffect, useCallback } from "react";
 import { Users, Settings } from "lucide-react";
 import { ParticipantService } from "../../lib/database/participants";
 import { ProviderService } from "../../lib/database/providers";
@@ -20,11 +20,7 @@ export default function ParticipantsPage() {
     settings: "{}"
   });
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [participantsData, providersData, personasData] = await Promise.all([
         ParticipantService.getAll(),
@@ -40,7 +36,11 @@ export default function ParticipantsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [push]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
