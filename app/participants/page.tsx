@@ -7,6 +7,7 @@ import { ProviderService } from "../../lib/database/providers";
 import { PersonaService } from "../../lib/database/personas";
 import { UserParticipant, ModelProvider, Persona } from "../../types";
 import { useToastStore } from "../../stores/use-toast-store";
+import { supabaseBrowserClient } from "../../lib/supabase";
 
 export default function ParticipantsPage() {
   const { push } = useToastStore();
@@ -58,8 +59,15 @@ export default function ParticipantsPage() {
         return;
       }
 
+      // Get current user
+      const { data: { user }, error: userError } = await supabaseBrowserClient.auth.getUser();
+      if (userError || !user) {
+        push({ title: "User not authenticated", variant: "error" });
+        return;
+      }
+
       await ParticipantService.create({
-        owner_id: "", // Will be set by API
+        owner_id: user.id,
         provider_id: form.provider_id,
         persona_id: form.persona_id,
         settings
