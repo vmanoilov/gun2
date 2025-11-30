@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ArenaService } from "../../../lib/database/arenas";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const arenas = await ArenaService.getAll();

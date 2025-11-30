@@ -33,10 +33,10 @@ export default function ArenaBuilderPage() {
       ]);
       setProviders(providersData);
       setPersonas(personasData);
-      
+
       // Set default selections if data is available
       if (providersData.length > 0 && personasData.length > 0) {
-        setParticipants(prev => 
+        setParticipants(prev =>
           prev.map(p => ({
             ...p,
             provider_id: providersData[0].id,
@@ -51,44 +51,6 @@ export default function ArenaBuilderPage() {
       setLoading(false);
     }
   };
-
-  const handleSubmit = async () => {
-    if (!prompt.trim()) {
-      push({ title: "Prompt required", variant: "error" });
-      return;
-    }
-
-    try {
-      // TODO: Create actual arena run when we have the database set up
-      push({
-        title: "Arena configured",
-        description: "Database integration is ready. Set up Supabase to enable run creation.",
-        variant: "success"
-      });
-    } catch (error) {
-      console.error("Error creating run:", error);
-      push({ title: "Failed to create run", variant: "error" });
-    }
-  };
-
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleSubmit();
-  };
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <header className="space-y-2">
-          <p className="text-primary font-semibold">Arena builder</p>
-          <h1 className="text-3xl font-bold text-gray-900">Configure debate settings</h1>
-        </header>
-        <div className="card p-6">
-          <p>Loading providers and personas...</p>
-        </div>
-      </div>
-    );
-  }
 
   const participantSelector = useMemo(
     () =>
@@ -141,6 +103,44 @@ export default function ArenaBuilderPage() {
       )),
     [participants, providers, personas]
   );
+
+  const handleSubmit = async () => {
+    if (!prompt.trim()) {
+      push({ title: "Prompt required", variant: "error" });
+      return;
+    }
+
+    try {
+      // TODO: Create actual arena run when we have the database set up
+      push({
+        title: "Arena configured",
+        description: "Database integration is ready. Set up Supabase to enable run creation.",
+        variant: "success"
+      });
+    } catch (error) {
+      console.error("Error creating run:", error);
+      push({ title: "Failed to create run", variant: "error" });
+    }
+  };
+
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleSubmit();
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <header className="space-y-2">
+          <p className="text-primary font-semibold">Arena builder</p>
+          <h1 className="text-3xl font-bold text-gray-900">Configure debate settings</h1>
+        </header>
+        <div className="card p-6">
+          <p>Loading providers and personas...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

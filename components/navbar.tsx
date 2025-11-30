@@ -18,7 +18,7 @@ export function Navbar() {
         </Link>
         <nav className="hidden md:flex items-center gap-4 text-sm font-medium text-gray-700">
           {links.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-primary">
+            <Link key={link.href} href={link.href as any} className="hover:text-primary">
               {link.label}
             </Link>
           ))}

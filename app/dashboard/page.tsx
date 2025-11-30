@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Clock, Filter, PlusCircle } from "lucide-react";
 import { RunService } from "../../lib/database/runs";
+import { ArenaRun } from "../../types";
 
 const statuses = [
   { label: "Pending", value: "pending" },
@@ -12,7 +13,7 @@ const statuses = [
 export default async function DashboardPage() {
   // In a real app, this would be done with proper auth
   // For now, we'll show a placeholder when no data exists
-  let runs = [];
+  let runs: ArenaRun[] = [];
   let error = null;
 
   try {
@@ -51,7 +52,7 @@ export default async function DashboardPage() {
         <div className="card p-6">
           <div className="text-center py-8">
             <p className="text-red-600 mb-2">⚠️ {error}</p>
-            <p className="text-gray-600">This is expected if you haven't set up your Supabase database yet.</p>
+            <p className="text-gray-600">This is expected if you have not set up your Supabase database yet.</p>
             <p className="text-gray-600">Check the supabase-schema.sql file to set up your database.</p>
           </div>
         </div>

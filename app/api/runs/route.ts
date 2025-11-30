@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RunService } from "../../../lib/database/runs";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const runs = await RunService.getAll();

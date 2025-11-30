@@ -44,7 +44,7 @@ export default function RunViewer({ params }: { params: { id: string } }) {
                   <p className="text-xs text-gray-500">Round {round.round_number}</p>
                   <h3 className="text-lg font-semibold text-gray-900 capitalize">{round.phase} phase</h3>
                 </div>
-                <p className="text-xs text-gray-600">Temperature: {round.metadata?.temperature ?? 0.7}</p>
+                <p className="text-xs text-gray-600">Temperature: {String(round.metadata?.temperature ?? 0.7)}</p>
               </div>
               <div className="space-y-2">
                 {sampleMessages

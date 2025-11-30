@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PersonaService } from "../../../lib/database/personas";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
+    // Seed ChaosAlchemist persona if it doesn't exist
+    await PersonaService.seedChaosAlchemist();
+
     const personas = await PersonaService.getAll();
     return NextResponse.json(personas);
   } catch (error) {

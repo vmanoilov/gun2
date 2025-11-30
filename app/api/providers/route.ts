@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ProviderService } from "../../../lib/database/providers";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const providers = await ProviderService.getAll();
