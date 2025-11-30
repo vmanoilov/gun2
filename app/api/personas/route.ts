@@ -3,7 +3,7 @@ import { PersonaService } from "../../../lib/database/personas";
 
 export async function GET() {
   try {
-    const personas = await PersonaService.getAllServer();
+    const personas = await PersonaService.getAll();
     return NextResponse.json(personas);
   } catch (error) {
     console.error("Error fetching personas:", error);
@@ -17,7 +17,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const persona = await PersonaService.createServer(body);
+    const persona = await PersonaService.create(body);
     return NextResponse.json(persona, { status: 201 });
   } catch (error) {
     console.error("Error creating persona:", error);

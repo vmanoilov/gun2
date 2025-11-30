@@ -3,7 +3,7 @@ import { RunService } from "../../../lib/database/runs";
 
 export async function GET() {
   try {
-    const runs = await RunService.getAllServer();
+    const runs = await RunService.getAll();
     return NextResponse.json(runs);
   } catch (error) {
     console.error("Error fetching runs:", error);
@@ -17,7 +17,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const run = await RunService.createServer(body);
+    const run = await RunService.create(body);
     return NextResponse.json(run, { status: 201 });
   } catch (error) {
     console.error("Error creating run:", error);
