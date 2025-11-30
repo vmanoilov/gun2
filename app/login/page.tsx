@@ -28,6 +28,18 @@ export default function LoginPage() {
 
       if (error) throw error;
 
+      // Wait for auth state to be updated
+      await new Promise<void>((resolve) => {
+        const { data: { subscription } } = supabaseBrowserClient.auth.onAuthStateChange(
+          (event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+              subscription.unsubscribe();
+              resolve();
+            }
+          }
+        );
+      });
+
       push({ title: "Logged in successfully", variant: "success" });
       router.push("/dashboard");
     } catch (error: any) {
