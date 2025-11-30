@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import ProvidersClient from "./providers-client";
+import ProvidersClient from "./ProvidersClient";
 
 export default async function ProvidersPage() {
   const cookieStore = cookies();
