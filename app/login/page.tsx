@@ -21,24 +21,16 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const { error } = await supabaseBrowserClient.auth.signInWithPassword({
+      const { data, error } = await supabaseBrowserClient.auth.signInWithPassword({
         email: form.email,
         password: form.password,
       });
 
       if (error) throw error;
 
-      // Wait for auth state to be updated
-      await new Promise<void>((resolve) => {
-        const { data: { subscription } } = supabaseBrowserClient.auth.onAuthStateChange(
-          (event, session) => {
-            if (event === 'SIGNED_IN' && session) {
-              subscription.unsubscribe();
-              resolve();
-            }
-          }
-        );
-      });
+      if (!data.session) {
+        throw new Error("No session created");
+      }
 
       push({ title: "Logged in successfully", variant: "success" });
       router.push("/dashboard");
