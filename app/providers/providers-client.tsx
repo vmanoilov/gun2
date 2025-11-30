@@ -1,27 +1,35 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import ProvidersClient from "./providers-client";
+"use client";
 
-export default function ProvidersPage() {
+import { FormEvent, useState, useEffect } from "react";
+import { Shield, ToggleLeft } from "lucide-react";
+import { ProviderService } from "../../lib/database/providers";
+import { ModelProvider } from "../../types";
+import { useToastStore } from "../../stores/use-toast-store";
+
+interface ProvidersClientProps {
+  initialProviders: ModelProvider[];
+  userId: string;
+}
+
+export default function ProvidersClient({ initialProviders, userId }: ProvidersClientProps) {
   const { push } = useToastStore();
-  const [providers, setProviders] = useState<ModelProvider[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [providers, setProviders] = useState<ModelProvider[]>(initialProviders);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", api_base_url: "", api_key_alias: "" });
 
   useEffect(() => {
-    loadProviders();
-  }, []);
+    setProviders(initialProviders);
+  }, [initialProviders]);
 
   const loadProviders = async () => {
     try {
       const data = await ProviderService.getAll();
-      setProviders(data);
+      // Filter by user since service doesn't do it
+      const userProviders = data.filter(p => p.owner_id === userId);
+      setProviders(userProviders);
     } catch (error) {
       console.error("Error loading providers:", error);
       push({ title: "Error loading providers", variant: "error" });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -32,13 +40,14 @@ export default function ProvidersPage() {
       return;
     }
 
+    setLoading(true);
     try {
       await ProviderService.create({
-        owner_id: null, // Demo mode - no authentication required
+        owner_id: userId,
         name: form.name,
         api_base_url: form.api_base_url || undefined,
         api_key_alias: form.api_key_alias,
-        is_shared: true
+        is_shared: false
       });
 
       push({ title: "Provider saved", variant: "success" });
@@ -47,22 +56,10 @@ export default function ProvidersPage() {
     } catch (error) {
       console.error("Error creating provider:", error);
       push({ title: "Failed to save provider", variant: "error" });
+    } finally {
+      setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <header className="space-y-2">
-          <p className="text-primary font-semibold">Model providers</p>
-          <h1 className="text-3xl font-bold text-gray-900">Manage providers securely</h1>
-        </header>
-        <div className="card p-6">
-          <p>Loading providers...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -103,8 +100,8 @@ export default function ProvidersPage() {
             />
             <p className="text-xs text-gray-600">Store real keys in server-side env vars; clients only see alias.</p>
           </div>
-          <button className="btn-primary w-full" type="submit">
-            Save provider
+          <button className="btn-primary w-full" type="submit" disabled={loading}>
+            {loading ? "Saving..." : "Save provider"}
           </button>
         </form>
         <div className="lg:col-span-2 card p-6 space-y-4">

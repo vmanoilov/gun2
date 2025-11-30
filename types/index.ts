@@ -78,3 +78,12 @@ export type FusedOutput = {
   export_json?: Record<string, unknown>;
   created_at?: string;
 };
+
+export type UserParticipant = {
+  id: string;
+  owner_id: string;
+  provider_id: string;
+  persona_id: string;
+  settings?: Record<string, unknown>;
+  created_at?: string;
+};

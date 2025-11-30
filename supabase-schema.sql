@@ -216,8 +216,8 @@ CREATE POLICY "Users can manage messages of own runs" ON arena_run_messages
 CREATE POLICY "Users can view fused outputs of own runs" ON fused_outputs
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM arena_runs 
-      WHERE arena_runs.id = fused_outputs.run_id 
+      SELECT 1 FROM arena_runs
+      WHERE arena_runs.id = fused_outputs.run_id
       AND arena_runs.owner_id = auth.uid()
     )
   );
@@ -225,11 +225,34 @@ CREATE POLICY "Users can view fused outputs of own runs" ON fused_outputs
 CREATE POLICY "Users can manage fused outputs of own runs" ON fused_outputs
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM arena_runs 
-      WHERE arena_runs.id = fused_outputs.run_id 
+      SELECT 1 FROM arena_runs
+      WHERE arena_runs.id = fused_outputs.run_id
       AND arena_runs.owner_id = auth.uid()
     )
   );
+
+-- User Participants table
+CREATE TABLE IF NOT EXISTS user_participants (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  owner_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  provider_id UUID REFERENCES model_providers(id) ON DELETE CASCADE NOT NULL,
+  persona_id UUID REFERENCES personas(id) ON DELETE CASCADE NOT NULL,
+  settings JSONB DEFAULT '{}',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- User Participants policies
+CREATE POLICY "Users can view own participants" ON user_participants
+  FOR SELECT USING (auth.uid() = owner_id);
+
+CREATE POLICY "Users can create participants" ON user_participants
+  FOR INSERT WITH CHECK (auth.uid() = owner_id);
+
+CREATE POLICY "Users can update own participants" ON user_participants
+  FOR UPDATE USING (auth.uid() = owner_id);
+
+CREATE POLICY "Users can delete own participants" ON user_participants
+  FOR DELETE USING (auth.uid() = owner_id);
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_model_providers_owner_id ON model_providers(owner_id);

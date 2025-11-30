@@ -4,7 +4,8 @@ import { FormEvent, useMemo, useState, useEffect } from "react";
 import { GitBranch, UsersRound } from "lucide-react";
 import { ProviderService } from "../../../lib/database/providers";
 import { PersonaService } from "../../../lib/database/personas";
-import { ModelProvider, Persona } from "../../../types";
+import { ParticipantService } from "../../../lib/database/participants";
+import { ModelProvider, Persona, UserParticipant } from "../../../types";
 import { useToastStore } from "../../../stores/use-toast-store";
 
 const roles = ["Red", "Blue", "Purple", "Judge"];
@@ -13,12 +14,13 @@ export default function ArenaBuilderPage() {
   const { push } = useToastStore();
   const [providers, setProviders] = useState<ModelProvider[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
+  const [customParticipants, setCustomParticipants] = useState<UserParticipant[]>([]);
   const [loading, setLoading] = useState(true);
   const [prompt, setPrompt] = useState("");
   const [rounds, setRounds] = useState(2);
   const [temperature, setTemperature] = useState(0.3);
   const [participants, setParticipants] = useState(
-    roles.map((role) => ({ role, provider_id: "", persona_id: "" }))
+    roles.map((role) => ({ role, provider_id: "", persona_id: "", participant_id: "" }))
   );
 
   useEffect(() => {
@@ -27,12 +29,14 @@ export default function ArenaBuilderPage() {
 
   const loadData = async () => {
     try {
-      const [providersData, personasData] = await Promise.all([
+      const [providersData, personasData, participantsData] = await Promise.all([
         ProviderService.getAll(),
-        PersonaService.getAll()
+        PersonaService.getAll(),
+        ParticipantService.getAll()
       ]);
       setProviders(providersData);
       setPersonas(personasData);
+      setCustomParticipants(participantsData);
 
       // Set default selections if data is available
       if (providersData.length > 0 && personasData.length > 0) {
@@ -57,51 +61,113 @@ export default function ArenaBuilderPage() {
       participants.map((participant, index) => (
         <div key={participant.role} className="space-y-2 border-b border-gray-200 pb-4">
           <p className="text-sm font-semibold text-gray-800">{participant.role} role</p>
-          <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="space-y-2">
             <label className="space-y-1">
-              <span className="label">Provider</span>
+              <span className="label">Participant Type</span>
               <select
                 className="input"
-                value={participant.provider_id}
+                value={participant.participant_id ? "custom" : "built-in"}
                 onChange={(e) =>
                   setParticipants((prev) => {
                     const updated = [...prev];
-                    updated[index] = { ...prev[index], provider_id: e.target.value };
+                    if (e.target.value === "custom" && customParticipants.length > 0) {
+                      updated[index] = {
+                        ...prev[index],
+                        participant_id: customParticipants[0].id,
+                        provider_id: "",
+                        persona_id: ""
+                      };
+                    } else {
+                      updated[index] = {
+                        ...prev[index],
+                        participant_id: "",
+                        provider_id: providers.length > 0 ? providers[0].id : "",
+                        persona_id: personas.length > 0 ? personas[0].id : ""
+                      };
+                    }
                     return updated;
                   })
                 }
               >
-                {providers.map((provider) => (
-                  <option key={provider.id} value={provider.id}>
-                    {provider.name}
-                  </option>
-                ))}
+                <option value="built-in">Built-in (Provider + Persona)</option>
+                <option value="custom" disabled={customParticipants.length === 0}>
+                  Custom Participant ({customParticipants.length} available)
+                </option>
               </select>
             </label>
-            <label className="space-y-1">
-              <span className="label">Persona</span>
-              <select
-                className="input"
-                value={participant.persona_id}
-                onChange={(e) =>
-                  setParticipants((prev) => {
-                    const updated = [...prev];
-                    updated[index] = { ...prev[index], persona_id: e.target.value };
-                    return updated;
-                  })
-                }
-              >
-                {personas.map((persona) => (
-                  <option key={persona.id} value={persona.id}>
-                    {persona.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {participant.participant_id ? (
+              <label className="space-y-1">
+                <span className="label">Custom Participant</span>
+                <select
+                  className="input"
+                  value={participant.participant_id}
+                  onChange={(e) =>
+                    setParticipants((prev) => {
+                      const updated = [...prev];
+                      updated[index] = { ...prev[index], participant_id: e.target.value };
+                      return updated;
+                    })
+                  }
+                >
+                  {customParticipants.map((customParticipant) => {
+                    const provider = providers.find(p => p.id === customParticipant.provider_id);
+                    const persona = personas.find(p => p.id === customParticipant.persona_id);
+                    return (
+                      <option key={customParticipant.id} value={customParticipant.id}>
+                        {provider?.name} + {persona?.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <label className="space-y-1">
+                  <span className="label">Provider</span>
+                  <select
+                    className="input"
+                    value={participant.provider_id}
+                    onChange={(e) =>
+                      setParticipants((prev) => {
+                        const updated = [...prev];
+                        updated[index] = { ...prev[index], provider_id: e.target.value };
+                        return updated;
+                      })
+                    }
+                  >
+                    {providers.map((provider) => (
+                      <option key={provider.id} value={provider.id}>
+                        {provider.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="space-y-1">
+                  <span className="label">Persona</span>
+                  <select
+                    className="input"
+                    value={participant.persona_id}
+                    onChange={(e) =>
+                      setParticipants((prev) => {
+                        const updated = [...prev];
+                        updated[index] = { ...prev[index], persona_id: e.target.value };
+                        return updated;
+                      })
+                    }
+                  >
+                    {personas.map((persona) => (
+                      <option key={persona.id} value={persona.id}>
+                        {persona.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            )}
           </div>
         </div>
       )),
-    [participants, providers, personas]
+    [participants, providers, personas, customParticipants]
   );
 
   const handleSubmit = async () => {
