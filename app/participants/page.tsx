@@ -23,16 +23,35 @@ export default function ParticipantsPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const [participantsData, providersData, personasData] = await Promise.all([
-        ParticipantService.getAll(),
-        ProviderService.getAll(),
-        PersonaService.getAll()
-      ]);
+      console.log("🔍 Loading data for participants page...");
+
+      // Check auth status
+      const { data: { user }, error: userError } = await supabaseBrowserClient.auth.getUser();
+      console.log("👤 Auth check:", { user: user ? "authenticated" : "not authenticated", userError });
+
+      if (userError) {
+        console.error("Auth error:", userError);
+        push({ title: "Authentication error", variant: "error" });
+        return;
+      }
+
+      console.log("📡 Fetching participants...");
+      const participantsData = await ParticipantService.getAll();
+      console.log("✅ Participants loaded:", participantsData.length);
+
+      console.log("📡 Fetching providers...");
+      const providersData = await ProviderService.getAll();
+      console.log("✅ Providers loaded:", providersData.length);
+
+      console.log("📡 Fetching personas...");
+      const personasData = await PersonaService.getAll();
+      console.log("✅ Personas loaded:", personasData.length);
+
       setParticipants(participantsData);
       setProviders(providersData);
       setPersonas(personasData);
     } catch (error) {
-      console.error("Error loading data:", error);
+      console.error("❌ Error loading data:", error);
       push({ title: "Error loading data", variant: "error" });
     } finally {
       setLoading(false);
