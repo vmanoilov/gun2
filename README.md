@@ -1,8 +1,10 @@
 # GauntletFuse
 
-**Version 1.1.0**
+**Version 1.1.2**
 
 GauntletFuse is a Next.js + TypeScript multi-LLM orchestration engine where multiple providers and personas debate, critique, and fuse responses. Latest update adds authentication system, custom participant management, and route protection.
+
+Fixed blank-screen bug for arenas/build and participants.
 
 ## Quick Start
 
