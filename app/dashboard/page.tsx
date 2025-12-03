@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Clock, Filter, PlusCircle } from "lucide-react";
-import { RunService } from "../../lib/database/runs";
 import { ArenaRun } from "../../types";
 
 const statuses = [
@@ -17,9 +16,21 @@ export default async function DashboardPage() {
   let error = null;
 
   try {
-    runs = await RunService.getAll();
+    const response = await fetch(`http://localhost:3000/api/runs`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    runs = await response.json();
   } catch (err) {
-    console.error("Error loading runs:", err);
+    console.error("Error loading runs from API:", err);
     error = "Failed to load runs. Please check your database connection.";
   }
 
