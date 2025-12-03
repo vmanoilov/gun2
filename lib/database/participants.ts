@@ -1,6 +1,40 @@
 import { supabaseBrowserClient } from "../supabase";
 import { supabaseServerClient } from "../supabase-server";
-import { UserParticipant } from "../../types";
+import { UserParticipant, ArenaRunParticipant } from "../../types";
+
+export class RunParticipantService {
+  // Get participants for a specific run
+  static async getByRunId(runId: string): Promise<ArenaRunParticipant[]> {
+    const { data, error } = await supabaseBrowserClient
+      .from("arena_run_participants")
+      .select("*")
+      .eq("run_id", runId);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async getByRunIdServer(runId: string): Promise<ArenaRunParticipant[]> {
+    const { data, error } = await supabaseServerClient
+      .from("arena_run_participants")
+      .select("*")
+      .eq("run_id", runId);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async create(participant: Omit<ArenaRunParticipant, "id">): Promise<ArenaRunParticipant> {
+    const { data, error } = await supabaseBrowserClient
+      .from("arena_run_participants")
+      .insert([participant])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+}
 
 export class ParticipantService {
   // Browser client methods
