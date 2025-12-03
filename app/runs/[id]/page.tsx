@@ -23,19 +23,19 @@ export default async function RunViewer({ params }: { params: { id: string } }) 
   let error: string | null = null;
 
   try {
-    // Fetch all data for the run
-    run = await RunService.getById(params.id);
+    // Fetch all data for the run using server methods
+    run = await RunService.getByIdServer(params.id);
     
     if (!run) {
       notFound();
     }
 
-    // Fetch related data in parallel
+    // Fetch related data in parallel using server methods
     [rounds, messages, fusedOutput, participants] = await Promise.all([
-      RoundService.getByRunId(params.id),
-      MessageService.getByRunId(params.id),
-      FusedOutputService.getByRunId(params.id),
-      RunParticipantService.getByRunId(params.id)
+      RoundService.getByRunIdServer(params.id),
+      MessageService.getByRunIdServer(params.id),
+      FusedOutputService.getByRunIdServer(params.id),
+      RunParticipantService.getByRunIdServer(params.id)
     ]);
   } catch (err) {
     console.error("Error loading run data:", err);

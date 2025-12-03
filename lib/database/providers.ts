@@ -1,5 +1,6 @@
 import { supabaseBrowserClient } from "../supabase";
 import { ModelProvider } from "../../types";
+import { PGRST_ERROR_CODES } from "../constants";
 
 export class ProviderService {
   static async getAll(): Promise<ModelProvider[]> {
@@ -20,7 +21,7 @@ export class ProviderService {
       .single();
     
     if (error) {
-      if (error.code === "PGRST116") return null; // No rows returned
+      if (error.code === PGRST_ERROR_CODES.NO_ROWS) return null;
       throw error;
     }
     return data;

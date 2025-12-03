@@ -1,5 +1,6 @@
 import { supabaseBrowserClient } from "../supabase";
 import { Persona } from "../../types";
+import { PGRST_ERROR_CODES } from "../constants";
 
 export class PersonaService {
   static async getAll(): Promise<Persona[]> {
@@ -20,7 +21,7 @@ export class PersonaService {
       .single();
     
     if (error) {
-      if (error.code === "PGRST116") return null;
+      if (error.code === PGRST_ERROR_CODES.NO_ROWS) return null;
       throw error;
     }
     return data;

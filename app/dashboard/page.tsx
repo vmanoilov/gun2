@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   let error = null;
 
   try {
-    runs = await RunService.getAll();
+    runs = await RunService.getAllServer();
   } catch (err) {
     console.error("Error loading runs:", err);
     error = "Failed to load runs. Please check your database connection.";

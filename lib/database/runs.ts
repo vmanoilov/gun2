@@ -1,9 +1,21 @@
 import { supabaseBrowserClient } from "../supabase";
+import { supabaseServerClient } from "../supabase-server";
 import { ArenaRun } from "../../types";
+import { PGRST_ERROR_CODES } from "../constants";
 
 export class RunService {
   static async getAll(): Promise<ArenaRun[]> {
     const { data, error } = await supabaseBrowserClient
+      .from("arena_runs")
+      .select("*")
+      .order("created_at", { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async getAllServer(): Promise<ArenaRun[]> {
+    const { data, error } = await supabaseServerClient
       .from("arena_runs")
       .select("*")
       .order("created_at", { ascending: false });
@@ -20,7 +32,21 @@ export class RunService {
       .single();
     
     if (error) {
-      if (error.code === "PGRST116") return null;
+      if (error.code === PGRST_ERROR_CODES.NO_ROWS) return null;
+      throw error;
+    }
+    return data;
+  }
+
+  static async getByIdServer(id: string): Promise<ArenaRun | null> {
+    const { data, error } = await supabaseServerClient
+      .from("arena_runs")
+      .select("*")
+      .eq("id", id)
+      .single();
+    
+    if (error) {
+      if (error.code === PGRST_ERROR_CODES.NO_ROWS) return null;
       throw error;
     }
     return data;

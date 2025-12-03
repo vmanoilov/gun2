@@ -1,6 +1,7 @@
 import { supabaseBrowserClient } from "../supabase";
 import { supabaseServerClient } from "../supabase-server";
 import { UserParticipant, ArenaRunParticipant } from "../../types";
+import { PGRST_ERROR_CODES } from "../constants";
 
 export class RunParticipantService {
   // Get participants for a specific run
@@ -56,7 +57,7 @@ export class ParticipantService {
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") return null; // No rows returned
+      if (error.code === PGRST_ERROR_CODES.NO_ROWS) return null;
       throw error;
     }
     return data;
