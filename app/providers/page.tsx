@@ -3,6 +3,9 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import ProvidersClient from "./ProvidersClient";
 
+// Force dynamic rendering to avoid static generation at build time
+export const dynamic = 'force-dynamic';
+
 export default async function ProvidersPage() {
   const cookieStore = cookies();
   const supabase = createServerClient(

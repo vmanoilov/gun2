@@ -9,6 +9,16 @@ export async function middleware(request: NextRequest) {
     },
   });
 
+  // Check if Supabase is configured
+  const hasSupabaseConfig = 
+    process.env.NEXT_PUBLIC_SUPABASE_URL && 
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // If Supabase is not configured, skip authentication checks
+  if (!hasSupabaseConfig) {
+    return response;
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

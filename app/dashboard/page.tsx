@@ -3,6 +3,9 @@ import { Clock, Filter, PlusCircle } from "lucide-react";
 import { RunService } from "../../lib/database/runs";
 import { ArenaRun } from "../../types";
 
+// Force dynamic rendering to avoid static generation at build time
+export const dynamic = 'force-dynamic';
+
 const statuses = [
   { label: "Pending", value: "pending" },
   { label: "Running", value: "running" },
