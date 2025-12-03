@@ -16,7 +16,12 @@ export default async function DashboardPage() {
   let error = null;
 
   try {
-    const response = await fetch(`http://localhost:3000/api/runs`, {
+    // Get the base URL for the current environment
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000';
+
+    const response = await fetch(`${baseUrl}/api/runs`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
