@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { Clock, Filter, PlusCircle } from "lucide-react";
 import { ArenaRun } from "../../types";
+import { useEffect, useState } from "react";
 
 const statuses = [
   { label: "Pending", value: "pending" },
@@ -9,35 +12,37 @@ const statuses = [
   { label: "Failed", value: "failed" }
 ];
 
-export default async function DashboardPage() {
-  // In a real app, this would be done with proper auth
-  // For now, we'll show a placeholder when no data exists
-  let runs: ArenaRun[] = [];
-  let error = null;
+export default function DashboardPage() {
+  const [runs, setRuns] = useState<ArenaRun[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  try {
-    // Get the base URL for the current environment
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000';
+  useEffect(() => {
+    async function fetchRuns() {
+      try {
+        const response = await fetch('/api/runs', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
 
-    const response = await fetch(`${baseUrl}/api/runs`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-store'
-    });
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
 
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+        const data = await response.json();
+        setRuns(data);
+      } catch (err) {
+        console.error("Error loading runs from API:", err);
+        setError("Failed to load runs. Please check your database connection.");
+      } finally {
+        setLoading(false);
+      }
     }
 
-    runs = await response.json();
-  } catch (err) {
-    console.error("Error loading runs from API:", err);
-    error = "Failed to load runs. Please check your database connection.";
-  }
+    fetchRuns();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -63,8 +68,14 @@ export default async function DashboardPage() {
           ))}
         </div>
       </div>
-      
-      {error ? (
+
+      {loading ? (
+        <div className="card p-6">
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-2">Loading runs data...</p>
+          </div>
+        </div>
+      ) : error ? (
         <div className="card p-6">
           <div className="text-center py-8">
             <p className="text-red-600 mb-2">⚠️ {error}</p>
